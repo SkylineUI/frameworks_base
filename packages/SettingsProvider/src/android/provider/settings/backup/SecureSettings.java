@@ -225,6 +225,7 @@ public class SecureSettings {
         Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.DOZE_ON_CHARGE,
-        Settings.Secure.SHOW_WIFI_STANDARD_ICON
+        Settings.Secure.SHOW_WIFI_STANDARD_ICON,
+        Settings.Secure.POWER_MENU_HIDE_ON_SECURE,
     };
 }
