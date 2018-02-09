@@ -14,6 +14,7 @@ import com.android.systemui.qs.tiles.VpnTile
 import com.android.systemui.qs.tiles.LiveDisplayTile
 import com.android.systemui.qs.tiles.ReadingModeTile
 import com.android.systemui.qs.tiles.AntiFlickerTile
+import com.android.systemui.qs.tiles.SoundSearchTile
 
 import dagger.Binds
 import dagger.Module
@@ -99,4 +100,10 @@ interface CustomQSModule {
     @IntoMap
     @StringKey(AntiFlickerTile.TILE_SPEC)
     fun bindAntiFlickerTile(antiFlickerTile: AntiFlickerTile): QSTileImpl<*>
+
+    /** Inject SoundSearchTile into tileMap in QSModule */
+    @Binds
+    @IntoMap
+    @StringKey(SoundSearchTile.TILE_SPEC)
+    fun bindSoundSearchTile(soundSearchTile: SoundSearchTile): QSTileImpl<*>
 }
