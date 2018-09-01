@@ -14,4 +14,7 @@
     <string name="turn_on_bluetooth">Use Bluetooth</string>
     <string name="bluetooth_is_off">Bluetooth is off</string>
     <string name="tap_a_device_to_connect">Tap a device to connect</string>
+
+    <!-- Label for area where tiles can be added to the qs panel -->
+    <string name="drag_or_tap_to_add_tiles">Hold &amp; drag or tap to add tiles</string>
 </resources>
