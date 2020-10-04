@@ -227,5 +227,6 @@ public class SecureSettings {
         Settings.Secure.DOZE_ON_CHARGE,
         Settings.Secure.SHOW_WIFI_STANDARD_ICON,
         Settings.Secure.POWER_MENU_HIDE_ON_SECURE,
+        Settings.Secure.GESTURE_NAVBAR_LENGTH_MODE,
     };
 }
