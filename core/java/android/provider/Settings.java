@@ -5546,6 +5546,13 @@ public final class Settings {
         public static final String DESKTOP_MODE = "desktop_mode";
 
         /**
+         * Whether to hide navbar pill and keyboard space.
+         * Default 0.
+         * @hide
+         */
+        public static final String FULLSCREEN_GESTURES = "fullscreen_gestures";
+
+        /**
          * Whether the button backlight is only lit when pressed (and not when screen is touched)
          * The value is boolean (1 or 0).
          * @hide
