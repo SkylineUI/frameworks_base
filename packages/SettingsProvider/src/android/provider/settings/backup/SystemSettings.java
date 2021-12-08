@@ -89,7 +89,6 @@ public class SystemSettings {
         Settings.System.NOTIFICATION_LIGHT_PULSE,
         Settings.System.RINGTONE_VIBRATION_PATTERN,
         Settings.System.NOTIFICATION_VIBRATION_PATTERN,
-        Settings.System.FULLSCREEN_GESTURES,
         Settings.System.NAVIGATION_BAR_IME_SPACE,
     };
 }

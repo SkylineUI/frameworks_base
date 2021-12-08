@@ -109,6 +109,8 @@ public class NavigationBarInflaterView extends FrameLayout
     private static final String KEY_NAVIGATION_SPACE =
             "system:" + Settings.System.NAVIGATION_BAR_IME_SPACE;
 
+    private static final String OVERLAY_NAVIGATION_FULL_SCREEN = "com.skylineui.overlay.immnav.gestural";
+
     protected LayoutInflater mLayoutInflater;
     protected LayoutInflater mLandscapeInflater;
 
@@ -132,7 +134,7 @@ public class NavigationBarInflaterView extends FrameLayout
     private boolean mCompactLayout;
     private static AtomicReference<Boolean> mIsHintEnabledRef;
 
-    private int mHomeHandleWidthMode = 0;
+    private int mHomeHandleWidthMode = 1;
 
     private boolean mIsAttachedToWindow;
 
@@ -191,6 +193,9 @@ public class NavigationBarInflaterView extends FrameLayout
         if (!mIsHintEnabledRef.get() && defaultResource == R.string.config_navBarLayoutHandle) {
             return getContext().getString(defaultResource).replace(HOME_HANDLE, "");
         }
+        if (mHomeHandleWidthMode == 0 && defaultResource == R.string.config_navBarLayoutHandle) {
+            return getContext().getString(defaultResource).replace(HOME_HANDLE, "");
+        }
         return getContext().getString(defaultResource);
     }
 
@@ -219,6 +224,7 @@ public class NavigationBarInflaterView extends FrameLayout
             if (QuickStepContract.isGesturalMode(mNavBarMode)) {
                 clearViews();
                 inflateLayout(getDefaultLayout());
+                updateNavbar(mHomeHandleWidthMode);
             }
         }
     }
@@ -357,6 +363,21 @@ public class NavigationBarInflaterView extends FrameLayout
         } catch (IllegalArgumentException | RemoteException e) {
             Log.e(TAG, "Failed to " + (state ? "enable" : "disable")
                     + " overlay " + OVERLAY_NAVIGATION_HIDE_HINT + " for user " + userId);
+        }
+    }
+
+    private void updateNavbar(int mode) {
+        final IOverlayManager iom = IOverlayManager.Stub.asInterface(
+                ServiceManager.getService(Context.OVERLAY_SERVICE));
+        final boolean state = mode == 0;
+        final int userId = ActivityManager.getCurrentUser();
+        try {
+            iom.setEnabled(OVERLAY_NAVIGATION_FULL_SCREEN, state, userId);
+            if (state) {
+                iom.setHighestPriority(OVERLAY_NAVIGATION_FULL_SCREEN, userId);
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -562,11 +583,11 @@ public class NavigationBarInflaterView extends FrameLayout
         } else if (HOME_HANDLE.equals(button)) {
             v = inflater.inflate(R.layout.home_handle, parent, false);
             final ViewGroup.LayoutParams lp = v.getLayoutParams();
-            if (mHomeHandleWidthMode == 1) {
+            if (mHomeHandleWidthMode == 2) {
                 lp.width = getResources().getDimensionPixelSize(
                     R.dimen.navigation_home_handle_width_medium);
                 v.setLayoutParams(lp);
-            } else if (mHomeHandleWidthMode == 2) {
+            } else if (mHomeHandleWidthMode == 3) {
                 lp.width = getResources().getDimensionPixelSize(
                     R.dimen.navigation_home_handle_width_long);
                 v.setLayoutParams(lp);
