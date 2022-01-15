@@ -25,6 +25,8 @@ import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_NETW
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.Gravity;
@@ -390,6 +392,8 @@ public interface StatusBarIconController {
 
         protected ArrayList<String> mBlockList = new ArrayList<>();
 
+        private final boolean mNewIconStyle;
+
         public IconManager(
                 ViewGroup group,
                 StatusBarLocation location,
@@ -404,6 +408,8 @@ public interface StatusBarIconController {
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
+            mNewIconStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUSBAR_COLORED_ICONS, 0, UserHandle.USER_CURRENT) == 1;
             mLocation = location;
 
             if (statusBarPipelineFlags.runNewMobileIconsBackend()) {
@@ -495,6 +501,7 @@ public interface StatusBarIconController {
         protected StatusBarIconView addIcon(int index, String slot, boolean blocked,
                 StatusBarIcon icon) {
             StatusBarIconView view = onCreateStatusBarIconView(slot, blocked);
+            view.setIconStyle(mNewIconStyle);
             view.set(icon);
             mGroup.addView(view, index, onCreateLayoutParams());
             return view;
