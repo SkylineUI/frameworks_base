@@ -840,7 +840,7 @@ public class AuthService extends SystemService {
         } else if (!workaroundLocations.isEmpty()) {
             return new FingerprintSensorPropertiesInternal(sensorId,
                     Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
-                    componentInfo, sensorType, false /* halControlsIllumination */,
+                    componentInfo, sensorType, true /* halControlsIllumination */,
                     resetLockoutRequiresHardwareAuthToken,
                     workaroundLocations);
         } else {
