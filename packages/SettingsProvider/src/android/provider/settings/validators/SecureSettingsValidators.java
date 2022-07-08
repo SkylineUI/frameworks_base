@@ -369,5 +369,6 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.GESTURE_NAVBAR_LENGTH_MODE, new InclusiveIntegerRangeValidator(0, 2));
         VALIDATORS.put(Secure.LAUNCHER_HIDDEN_APPS, APP_LIST_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_ON_CHARGE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.SHOW_WIFI_STANDARD_ICON, BOOLEAN_VALIDATOR);
     }
 }
