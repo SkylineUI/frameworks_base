@@ -127,6 +127,8 @@ android_library {
         "LowLightDreamLib",
         "faceunlock_framework",
         "vendor.lineage.powershare-V1.0-java",
+        "colorkt",
+        "themelib",
     ],
     manifest: "AndroidManifest.xml",
     additional_manifests: ["CustomManifest.xml"],
