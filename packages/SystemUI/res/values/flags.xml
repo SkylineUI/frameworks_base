@@ -43,4 +43,8 @@
 
     <!-- Whether we want to stop pulsing while running the face scanning animation -->
     <bool name="flag_stop_pulsing_face_scanning_animation">true</bool>
+
+    <!-- Whether the combined qs shows in status bar when true, the combined qs will not be available
+         if set it to false  -->
+    <bool name="flag_combined_qs_headers">true</bool>
 </resources>
