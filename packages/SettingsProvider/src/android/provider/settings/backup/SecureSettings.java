@@ -228,5 +228,7 @@ public class SecureSettings {
         Settings.Secure.SHOW_WIFI_STANDARD_ICON,
         Settings.Secure.POWER_MENU_HIDE_ON_SECURE,
         Settings.Secure.GESTURE_NAVBAR_LENGTH_MODE,
+        Settings.Secure.DOZE_DOUBLE_TAP_GESTURE_AMBIENT,
+        Settings.Secure.DOZE_PICK_UP_GESTURE_AMBIENT
     };
 }
