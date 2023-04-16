@@ -38,7 +38,7 @@ import java.util.regex.Matcher;
 public class PixelPropsUtils {
 
     private static final String TAG = PixelPropsUtils.class.getSimpleName();
-    private static final String DEVICE = "org.pixelexperience.device";
+    private static final String DEVICE = "org.skylineui.device";
 
     private static volatile String[] sCertifiedProps;
 
