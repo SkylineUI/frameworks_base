@@ -303,5 +303,7 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.ADAPTIVE_PLAYBACK_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.ADAPTIVE_PLAYBACK_TIMEOUT, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(System.FORCE_FULLSCREEN_CUTOUT_APPS, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(System.RINGTONE_VIBRATION_PATTERN, new InclusiveIntegerRangeValidator(0, 4));
+        VALIDATORS.put(System.NOTIFICATION_VIBRATION_PATTERN, new InclusiveIntegerRangeValidator(0, 4));
     }
 }
