@@ -5374,6 +5374,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testVisitUris() throws Exception {
         final Uri audioContents = Uri.parse("content://com.example/audio");
         final Uri backgroundImage = Uri.parse("content://com.example/background");
+        final Icon smallIcon = Icon.createWithContentUri("content://media/small/icon");
+        final Icon largeIcon = Icon.createWithContentUri("content://media/large/icon");
         final Icon personIcon1 = Icon.createWithContentUri("content://media/person1");
         final Icon personIcon2 = Icon.createWithContentUri("content://media/person2");
         final Icon personIcon3 = Icon.createWithContentUri("content://media/person3");
@@ -5395,7 +5397,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 "a");
         final RemoteInputHistoryItem historyItem2 = new RemoteInputHistoryItem(null, historyUri2,
                 "b");
-
         Bundle extras = new Bundle();
         extras.putParcelable(Notification.EXTRA_AUDIO_CONTENTS_URI, audioContents);
         extras.putString(Notification.EXTRA_BACKGROUND_IMAGE_URI, backgroundImage.toString());
@@ -5404,22 +5405,97 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new ArrayList<>(Arrays.asList(person2, person3)));
         extras.putParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
                 new RemoteInputHistoryItem[]{historyItem1, historyItem2});
-
         Notification n = new Notification.Builder(mContext, "a")
                 .setContentTitle("notification with uris")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setSmallIcon(smallIcon)
+                .setLargeIcon(largeIcon)
                 .addExtras(extras)
                 .build();
-
         Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
         n.visitUris(visitor);
         verify(visitor, times(1)).accept(eq(audioContents));
         verify(visitor, times(1)).accept(eq(backgroundImage));
+        verify(visitor, times(1)).accept(eq(smallIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(largeIcon.getUri()));
         verify(visitor, times(1)).accept(eq(personIcon1.getUri()));
         verify(visitor, times(1)).accept(eq(personIcon2.getUri()));
         verify(visitor, times(1)).accept(eq(personIcon3.getUri()));
         verify(visitor, times(1)).accept(eq(historyUri1));
         verify(visitor, times(1)).accept(eq(historyUri2));
+    }
+
+    @Test
+    public void testVisitUris_publicVersion() throws Exception {
+        final Icon smallIconPublic = Icon.createWithContentUri("content://media/small/icon");
+        final Icon largeIconPrivate = Icon.createWithContentUri("content://media/large/icon");
+        Notification publicVersion = new Notification.Builder(mContext, "a")
+                .setContentTitle("notification with uris")
+                .setSmallIcon(smallIconPublic)
+                .build();
+        Notification n = new Notification.Builder(mContext, "a")
+                .setLargeIcon(largeIconPrivate)
+                .setPublicVersion(publicVersion)
+                .build();
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(smallIconPublic.getUri()));
+        verify(visitor, times(1)).accept(eq(largeIconPrivate.getUri()));
+    }
+
+    @Test
+    public void testVisitUris_audioContentsString() throws Exception {
+        final Uri audioContents = Uri.parse("content://com.example/audio");
+        Bundle extras = new Bundle();
+        extras.putString(Notification.EXTRA_AUDIO_CONTENTS_URI, audioContents.toString());
+        Notification n = new Notification.Builder(mContext, "a")
+                .setContentTitle("notification with uris")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addExtras(extras)
+                .build();
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(audioContents));
+    }
+
+    @Test
+    public void testVisitUris_messagingStyle() {
+        final Icon personIcon1 = Icon.createWithContentUri("content://media/person1");
+        final Icon personIcon2 = Icon.createWithContentUri("content://media/person2");
+        final Icon personIcon3 = Icon.createWithContentUri("content://media/person3");
+        final Person person1 = new Person.Builder()
+                .setName("Messaging Person 1")
+                .setIcon(personIcon1)
+                .build();
+        final Person person2 = new Person.Builder()
+                .setName("Messaging Person 2")
+                .setIcon(personIcon2)
+                .build();
+        final Person person3 = new Person.Builder()
+                .setName("Messaging Person 3")
+                .setIcon(personIcon3)
+                .build();
+        Icon shortcutIcon = Icon.createWithContentUri("content://media/shortcut");
+        Notification.Builder builder = new Notification.Builder(mContext, "a")
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setContentTitle("new message!")
+                .setContentText("Conversation Notification")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        Notification.MessagingStyle.Message message1 = new Notification.MessagingStyle.Message(
+                "Marco?", System.currentTimeMillis(), person2);
+        Notification.MessagingStyle.Message message2 = new Notification.MessagingStyle.Message(
+                "Polo!", System.currentTimeMillis(), person3);
+        Notification.MessagingStyle style = new Notification.MessagingStyle(person1)
+                .addMessage(message1)
+                .addMessage(message2)
+                .setShortcutIcon(shortcutIcon);
+        builder.setStyle(style);
+        Notification n = builder.build();
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(shortcutIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(personIcon1.getUri()));
+        verify(visitor, times(1)).accept(eq(personIcon2.getUri()));
+        verify(visitor, times(1)).accept(eq(personIcon3.getUri()));
     }
 
     @Test
@@ -5437,30 +5513,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setContentTitle("Calling...")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .build();
-
         Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
         n.visitUris(visitor);
-
         verify(visitor, times(1)).accept(eq(personIcon.getUri()));
         verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
-    }
-
-    @Test
-    public void testVisitUris_audioContentsString() throws Exception {
-        final Uri audioContents = Uri.parse("content://com.example/audio");
-
-        Bundle extras = new Bundle();
-        extras.putString(Notification.EXTRA_AUDIO_CONTENTS_URI, audioContents.toString());
-
-        Notification n = new Notification.Builder(mContext, "a")
-                .setContentTitle("notification with uris")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .addExtras(extras)
-                .build();
-
-        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
-        n.visitUris(visitor);
-        verify(visitor, times(1)).accept(eq(audioContents));
     }
 
     @Test
@@ -5470,16 +5526,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManager.Policy userPolicy =
                 new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
         when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
-
         NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
                 SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF);
-
         int expected = SUPPRESSED_EFFECT_BADGE
                 | SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF
                 | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_LIGHTS
                 | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
         int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, O_MR1);
-
         assertEquals(expected, actual);
     }
 
@@ -5490,13 +5543,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManager.Policy userPolicy =
                 new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
         when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
-
         NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
                 SUPPRESSED_EFFECT_NOTIFICATION_LIST);
-
         int expected = SUPPRESSED_EFFECT_BADGE;
         int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, O_MR1);
-
         assertEquals(expected, actual);
     }
 
@@ -5507,14 +5557,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManager.Policy userPolicy =
                 new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
         when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
-
         NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
                 SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_STATUS_BAR);
-
         int expected =
                 SUPPRESSED_EFFECT_BADGE | SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_PEEK;
         int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, O_MR1);
-
         assertEquals(expected, actual);
     }
 
@@ -5525,15 +5572,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManager.Policy userPolicy =
                 new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
         when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
-
         NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
                 SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF);
-
         int expected = SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF
                 | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT
                 | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
         int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
-
         assertEquals(expected, actual);
     }
 
@@ -5544,16 +5588,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManager.Policy userPolicy =
                 new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
         when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
-
         NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
                 SUPPRESSED_EFFECT_NOTIFICATION_LIST | SUPPRESSED_EFFECT_AMBIENT
                         | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
-
         int expected = SUPPRESSED_EFFECT_NOTIFICATION_LIST | SUPPRESSED_EFFECT_SCREEN_OFF
                 | SUPPRESSED_EFFECT_AMBIENT | SUPPRESSED_EFFECT_LIGHTS
                 | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
         int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
-
         assertEquals(expected, actual);
     }
 
@@ -5564,23 +5605,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManager.Policy userPolicy =
                 new NotificationManager.Policy(0, 0, 0, SUPPRESSED_EFFECT_BADGE);
         when(mZenModeHelper.getNotificationPolicy()).thenReturn(userPolicy);
-
         NotificationManager.Policy appPolicy = new NotificationManager.Policy(0, 0, 0,
                 SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_STATUS_BAR);
-
         int expected =  SUPPRESSED_EFFECT_STATUS_BAR;
         int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
-
         assertEquals(expected, actual);
-
         appPolicy = new NotificationManager.Policy(0, 0, 0,
                 SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_AMBIENT
                         | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
-
         expected =  SUPPRESSED_EFFECT_SCREEN_OFF | SUPPRESSED_EFFECT_AMBIENT
                 | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
         actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
-
         assertEquals(expected, actual);
     }
 
@@ -5592,7 +5627,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
-
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .setContentTitle("bar");
@@ -5600,7 +5634,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
-
         assertFalse(mService.isVisuallyInterruptive(r1, r2));
     }
 
@@ -5612,14 +5645,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
-
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentTitle("bar");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
                 nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
-
         assertTrue(mService.isVisuallyInterruptive(r1, r2));
     }
 
@@ -5632,7 +5663,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
-
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setStyle(new Notification.InboxStyle()
                         .addLine("line1").addLine("line2_changed"));
@@ -5640,9 +5670,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
-
         assertTrue(mService.isVisuallyInterruptive(r1, r2)); // line 2 changed unnoticed
-
         Notification.Builder nb3 = new Notification.Builder(mContext, "")
                 .setStyle(new Notification.InboxStyle()
                         .addLine("line1"));
@@ -5650,9 +5678,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb3.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r3 =
                 new NotificationRecord(mContext, sbn3, mock(NotificationChannel.class));
-
         assertTrue(mService.isVisuallyInterruptive(r1, r3)); // line 2 removed unnoticed
-
         Notification.Builder nb4 = new Notification.Builder(mContext, "")
                 .setStyle(new Notification.InboxStyle()
                         .addLine("line1").addLine("line2").addLine("line3"));
@@ -5660,16 +5686,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb4.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r4 =
                 new NotificationRecord(mContext, sbn4, mock(NotificationChannel.class));
-
         assertTrue(mService.isVisuallyInterruptive(r1, r4)); // line 3 added unnoticed
-
         Notification.Builder nb5 = new Notification.Builder(mContext, "")
             .setContentText("not an inbox");
         StatusBarNotification sbn5 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
                 nb5.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r5 =
                 new NotificationRecord(mContext, sbn5, mock(NotificationChannel.class));
-
         assertTrue(mService.isVisuallyInterruptive(r1, r5)); // changed Styles, went unnoticed
     }
 
@@ -5681,14 +5704,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nb1.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r1 =
                 new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
-
         Notification.Builder nb2 = new Notification.Builder(mContext, "")
                 .setContentText("bar");
         StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
                 nb2.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
         NotificationRecord r2 =
                 new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
-
         assertTrue(mService.isVisuallyInterruptive(r1, r2));
     }
 
