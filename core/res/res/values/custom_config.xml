@@ -220,5 +220,8 @@
     </string-array>
 
     <!-- Whether device has dash charging support -->
-<!--     <bool name="config_hasDashCharger">false</bool> -->
+     <bool name="config_hasDashCharger">false</bool>
+
+    <!-- Whether device has warp charging support -->
+    <bool name="config_hasWarpCharger">false</bool>
 </resources>
