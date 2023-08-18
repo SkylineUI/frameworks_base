@@ -218,4 +218,7 @@
     </string-array>
     <string-array name="device_configs_override" translatable="false">
     </string-array>
+
+    <!-- Whether device has dash charging support -->
+<!--     <bool name="config_hasDashCharger">false</bool> -->
 </resources>
