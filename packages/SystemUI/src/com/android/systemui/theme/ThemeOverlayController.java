@@ -410,6 +410,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
                 UserHandle.ALL);
+
         mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 false,
@@ -491,6 +492,18 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         if (!mIsMonetEnabled) {
             return;
         }
+
+        mSystemSettings.registerContentObserverForUser(
+                Settings.System.getUriFor(Settings.System.CLOCK_USE_CUSTOM_FORMAT),
+                false,
+                new ContentObserver(mBgHandler) {
+                    @Override
+                    public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
+                            int userId) {
+                        reevaluateSystemTheme(true /* forceReload */);
+                    }
+                },
+                UserHandle.USER_ALL);
 
         mUserTracker.addCallback(mUserTrackerCallback, mMainExecutor);
 
