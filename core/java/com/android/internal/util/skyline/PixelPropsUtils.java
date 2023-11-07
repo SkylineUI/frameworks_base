@@ -52,7 +52,7 @@ public class PixelPropsUtils {
     private static final String SPOOF_MUSIC_APPS = "persist.sys.disguise_props_for_music_app";
 
     private static final String TAG = PixelPropsUtils.class.getSimpleName();
-    private static final String DEVICE = "ro.product.device";
+    private static final String DEVICE = "org.skylineui.device";
     private static final boolean DEBUG = false;
 
     private static final Map<String, Object> propsToChangeGeneric;
